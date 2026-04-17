@@ -11,6 +11,11 @@ const router = createRouter({
       component: () => import('../views/Login.vue'),
     },
     {
+      path: '/',
+      redirect: '/students',
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/students',
       name: 'students',
       component: () => import('../views/Students.vue'),
