@@ -21,7 +21,7 @@ export const useCourseStore = defineStore('courses', () => {
     })
 
     if (!res.ok) {
-      return new APIError(res.status, 'Failed to load courses')
+      throw new APIError(res.status, 'Failed to load courses')
     }
 
     courses.value = await res.json()

@@ -66,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     if (!res.ok) {
       isLoading.value = false
-      return new APIError(res.status, 'Invalid credentials')
+      throw new APIError(res.status, 'Invalid credentials')
     }
 
     const data = await res.json()

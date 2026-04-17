@@ -12,7 +12,7 @@ export type Student = {
   name: string
   email: string
   grade: string
-  courseId: number
+  course: number
 }
 
 export type StudentFormData = Omit<Student, 'id'>

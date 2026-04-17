@@ -21,7 +21,7 @@ export const useStudentStore = defineStore('students', () => {
     })
 
     if (!res.ok) {
-      return new APIError(res.status, 'Failed to load students')
+      throw new APIError(res.status, 'Failed to load students')
     }
 
     students.value = await res.json()
@@ -62,11 +62,16 @@ export const useStudentStore = defineStore('students', () => {
     students.value = students.value.filter((s) => s.id !== id)
   }
 
+  function getStudentsInCourse(courseId: number) {
+    return students.value.filter((student) => student.course === courseId)
+  }
+
   return {
     students,
     isLoading,
     load,
     create,
     remove,
+    getStudentsInCourse,
   }
 })
