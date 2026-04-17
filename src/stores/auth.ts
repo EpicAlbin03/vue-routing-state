@@ -81,7 +81,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     localStorage.removeItem(USER_STORAGE_KEY)
+    localStorage.removeItem(JWT_STORAGE_KEY)
     user.value = null
+    accessToken.value = ''
     isLoading.value = false
   }
 
