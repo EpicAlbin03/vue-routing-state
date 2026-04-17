@@ -15,7 +15,7 @@ export type Student = {
   courseId: number
 }
 
-export type StudentFormData = Exclude<Student, 'id'>
+export type StudentFormData = Omit<Student, 'id'>
 
 export type Course = {
   id: number
