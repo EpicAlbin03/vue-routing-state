@@ -1,14 +1,14 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { API_URL } from '@/lib/constants'
-import { useUserStore } from './user'
 import { APIError } from '@/lib/utils'
 import type { Student, StudentFormData } from '@/lib/types'
+import { useAuthStore } from './auth'
 
 export const useStudentStore = defineStore('students', () => {
   const students = ref<Student[]>([])
   const isLoading = ref(false)
-  const userStore = useUserStore()
+  const authStore = useAuthStore()
 
   async function load() {
     isLoading.value = true
@@ -16,7 +16,7 @@ export const useStudentStore = defineStore('students', () => {
     const res = await fetch(`${API_URL}/students/`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${userStore.user.access_token}`,
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     })
 
@@ -33,7 +33,7 @@ export const useStudentStore = defineStore('students', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${userStore.user.access_token}`,
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
       body: JSON.stringify(formData),
     })
@@ -51,7 +51,7 @@ export const useStudentStore = defineStore('students', () => {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${userStore.user.access_token}`,
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     })
 

@@ -1,14 +1,14 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { API_URL } from '@/lib/constants'
-import { useUserStore } from './user'
 import { APIError } from '@/lib/utils'
 import type { Course } from '@/lib/types'
+import { useAuthStore } from './auth'
 
 export const useCourseStore = defineStore('courses', () => {
   const courses = ref<Course[]>([])
   const isLoading = ref(false)
-  const userStore = useUserStore()
+  const authStore = useAuthStore()
 
   async function load() {
     isLoading.value = true
@@ -16,7 +16,7 @@ export const useCourseStore = defineStore('courses', () => {
     const res = await fetch(`${API_URL}/courses/`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${userStore.user.access_token}`,
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     })
 
