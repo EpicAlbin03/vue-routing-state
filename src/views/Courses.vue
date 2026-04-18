@@ -1,21 +1,15 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-
 import CourseCard from '@/components/CourseCard.vue'
 import { useCourseStore } from '@/stores/courses'
 import { useStudentStore } from '@/stores/students'
 
 const courseStore = useCourseStore()
 const studentStore = useStudentStore()
-const errorMessage = ref('')
 
 onMounted(async () => {
-  try {
-    await Promise.all([courseStore.load(), studentStore.load()])
-  } catch (err) {
-    errorMessage.value = err instanceof Error ? err.message : 'Unkown error'
-  }
+  await Promise.all([courseStore.load(), studentStore.load()])
 })
 </script>
 
@@ -33,7 +27,7 @@ onMounted(async () => {
     </div>
 
     <p v-if="courseStore.isLoading" class="status-message">Loading courses...</p>
-    <p v-else-if="errorMessage" class="errorMessage">{{ errorMessage }}</p>
+    <p v-else-if="courseStore.errorMessage" class="errorMessage">{{ courseStore.errorMessage }}</p>
     <p v-else-if="courseStore.courses.length < 1" class="status-message">No courses yet</p>
     <div v-else class="card-grid">
       <CourseCard

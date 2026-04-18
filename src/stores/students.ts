@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { API_URL } from '@/lib/constants'
-import { APIError } from '@/lib/utils'
 import type { Student, StudentFormData } from '@/lib/types'
 import { useAuthStore } from './auth'
 
@@ -9,9 +8,11 @@ export const useStudentStore = defineStore('students', () => {
   const students = ref<Student[]>([])
   const isLoading = ref(false)
   const authStore = useAuthStore()
+  const errorMessage = ref('')
 
   async function load() {
     isLoading.value = true
+    errorMessage.value = ''
 
     const res = await fetch(`${API_URL}/students/`, {
       headers: {
@@ -21,7 +22,9 @@ export const useStudentStore = defineStore('students', () => {
     })
 
     if (!res.ok) {
-      throw new APIError(res.status, 'Failed to load students')
+      errorMessage.value = 'Failed to load students'
+      isLoading.value = false
+      return
     }
 
     students.value = await res.json()
@@ -29,6 +32,8 @@ export const useStudentStore = defineStore('students', () => {
   }
 
   async function create(formData: StudentFormData) {
+    errorMessage.value = ''
+
     const res = await fetch(`${API_URL}/students/`, {
       method: 'POST',
       headers: {
@@ -39,7 +44,8 @@ export const useStudentStore = defineStore('students', () => {
     })
 
     if (!res.ok) {
-      throw new APIError(res.status, 'Failed to create student')
+      errorMessage.value = 'Failed to create student'
+      return
     }
 
     await load()
@@ -47,6 +53,8 @@ export const useStudentStore = defineStore('students', () => {
 
   // 'delete' is reserved
   async function remove(id: number) {
+    errorMessage.value = ''
+
     const res = await fetch(`${API_URL}/students/${id}/`, {
       method: 'DELETE',
       headers: {
@@ -56,7 +64,8 @@ export const useStudentStore = defineStore('students', () => {
     })
 
     if (!res.ok) {
-      throw new APIError(res.status, 'Failed to delete student')
+      errorMessage.value = 'Failed to delete student'
+      return
     }
 
     students.value = students.value.filter((s) => s.id !== id)
@@ -69,6 +78,7 @@ export const useStudentStore = defineStore('students', () => {
   return {
     students,
     isLoading,
+    errorMessage,
     load,
     create,
     remove,

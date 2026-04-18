@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { API_URL } from '@/lib/constants'
-import { APIError } from '@/lib/utils'
 import type { Course } from '@/lib/types'
 import { useAuthStore } from './auth'
 
@@ -9,9 +8,11 @@ export const useCourseStore = defineStore('courses', () => {
   const courses = ref<Course[]>([])
   const isLoading = ref(false)
   const authStore = useAuthStore()
+  const errorMessage = ref('')
 
   async function load() {
     isLoading.value = true
+    errorMessage.value = ''
 
     const res = await fetch(`${API_URL}/courses/`, {
       headers: {
@@ -21,7 +22,8 @@ export const useCourseStore = defineStore('courses', () => {
     })
 
     if (!res.ok) {
-      throw new APIError(res.status, 'Failed to load courses')
+      isLoading.value = false
+      return
     }
 
     courses.value = await res.json()
@@ -31,6 +33,7 @@ export const useCourseStore = defineStore('courses', () => {
   return {
     courses,
     isLoading,
+    errorMessage,
     load,
   }
 })

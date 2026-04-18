@@ -1,12 +1,13 @@
 import { API_URL, JWT_STORAGE_KEY, USER_STORAGE_KEY } from '@/lib/constants'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { APIError, getStorageItem, setStorageItem } from '@/lib/utils'
+import { getStorageItem, setStorageItem } from '@/lib/utils'
 import type { LoginCredentials, User } from '@/lib/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(getStorageItem(USER_STORAGE_KEY) || null)
   const isLoading = ref(false)
+  const errorMessage = ref('')
   const accessToken = ref<string>(getStorageItem(JWT_STORAGE_KEY) || '')
   const hasValidAccessToken = computed(() => {
     if (!accessToken.value) {
@@ -52,6 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(credentials: LoginCredentials) {
     isLoading.value = true
+    errorMessage.value = ''
 
     const res = await fetch(`${API_URL}/token/`, {
       method: 'POST',
@@ -65,8 +67,9 @@ export const useAuthStore = defineStore('auth', () => {
     })
 
     if (!res.ok) {
+      errorMessage.value = 'Invalid credentials'
       isLoading.value = false
-      throw new APIError(res.status, 'Invalid credentials')
+      return
     }
 
     const data = await res.json()
@@ -84,12 +87,14 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(JWT_STORAGE_KEY)
     user.value = null
     accessToken.value = ''
+    errorMessage.value = ''
     isLoading.value = false
   }
 
   return {
     user,
     isLoading,
+    errorMessage,
     accessToken,
     hasValidAccessToken,
     login,
