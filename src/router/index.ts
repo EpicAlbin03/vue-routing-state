@@ -9,6 +9,7 @@ const router = createRouter({
       name: 'login',
       // Lazy loading: https://router.vuejs.org/guide/advanced/lazy-loading.html
       component: () => import('../views/Login.vue'),
+      meta: { requiresAuth: false },
     },
     {
       path: '/',
@@ -25,6 +26,7 @@ const router = createRouter({
       path: '/students/:id',
       name: 'student-detail',
       component: () => import('../views/StudentDetail.vue'),
+      props: (route) => ({ id: Number(route.params.id) }),
       meta: { requiresAuth: true },
     },
     {

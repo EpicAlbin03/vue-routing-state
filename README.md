@@ -47,12 +47,14 @@ src/
 ### 1. Create the Stores
 
 **src/stores/auth.js:**
+
 - state: token (init from localStorage), username (init from localStorage)
 - getters: isLoggedIn (returns !!state.token)
 - actions: login(username, password) — fetch /api/token/, store token, return true/false
 - actions: logout() — clear state + localStorage
 
 **src/stores/students.js:**
+
 - state: students (array), isLoading (boolean)
 - getters: (optional) filteredStudents if you want search in the store
 - actions: loadStudents() — fetch /api/students/ using auth token
@@ -60,6 +62,7 @@ src/
 - actions: deleteStudent(id) — DELETE, then remove from array
 
 **src/stores/courses.js:**
+
 - state: courses (array), isLoading (boolean)
 - actions: loadCourses() — fetch /api/courses/ using auth token
 
@@ -68,6 +71,7 @@ Same pattern as the students store but simpler — just load and display, no add
 ### 2. Create the Router
 
 **src/router/index.js:**
+
 - Routes: /login → Login, / → Dashboard, /students/:id → StudentDetail, /courses → Courses
 - Mark Dashboard, StudentDetail, Courses with meta: { requiresAuth: true }
 - Add a beforeEach guard: if route requiresAuth and no token, redirect to /login
@@ -93,21 +97,25 @@ App.vue should now only contain NavBar and <router-view>. No more v-if for login
 ### 5. Create the Views
 
 **Login.vue:**
+
 - Form with v-model for username/password
 - On submit: call authStore.login(), if success → $router.push('/')
 
 **Dashboard.vue:**
+
 - On mounted: call studentsStore.loadStudents()
 - Display search bar, add form, student cards
 - StudentCard "View" button links to /students/:id
 
 **StudentDetail.vue (NEW):**
+
 - Read $route.params.id
 - Fetch the single student from the API or find from the store
 - Display full details
 - Back button with $router.back()
 
 **Courses.vue (NEW):**
+
 - Create a src/stores/courses.js store
 - Fetch from /api/courses/ in mounted
 - Display course list
@@ -129,29 +137,29 @@ App.vue should now only contain NavBar and <router-view>. No more v-if for login
 
 ## Checklist
 
-- [ ] Pinia installed and wired in main.js
-- [ ] Auth store with login/logout actions
-- [ ] Students store with load/add/delete actions
-- [ ] Vue Router installed and wired in main.js
-- [ ] Routes defined for Login, Dashboard, StudentDetail, Courses
-- [ ] Route guard redirects to /login when not authenticated
-- [ ] App.vue simplified to NavBar + router-view
-- [ ] Login.vue redirects to / after successful login
-- [ ] Dashboard.vue loads students from store
-- [ ] StudentDetail.vue reads :id from route params
-- [ ] Courses.vue fetches and displays courses
-- [ ] NavBar reads from authStore directly (no props)
-- [ ] NavBar has router-links for navigation
-- [ ] Scoped styles on all components
+- [x] Pinia installed and wired in main.js
+- [x] Auth store with login/logout actions
+- [x] Students store with load/add/delete actions
+- [x] Vue Router installed and wired in main.js
+- [x] Routes defined for Login, Dashboard, StudentDetail, Courses
+- [x] Route guard redirects to /login when not authenticated
+- [x] App.vue simplified to NavBar + router-view
+- [x] Login.vue redirects to / after successful login
+- [x] Dashboard.vue loads students from store
+- [x] StudentDetail.vue reads :id from route params (router sends id as a prop)
+- [x] Courses.vue fetches and displays courses
+- [x] NavBar reads from authStore directly (no props)
+- [x] NavBar has router-links for navigation
+- [x] Scoped styles on all components (on some, rest is global in style.css)
 
 ---
 
 ## Bonus Challenges
 
-- [ ] **Redirect back** — remember where the user was going before login, redirect there after
-- [ ] **404 page** — catch unmatched routes with { path: '/:pathMatch(.*)*', component: NotFound }
-- [ ] **Active link styling** — style the current nav link differently using .router-link-active
-- [ ] **Search in store** — move searchTerm into studentsStore with a filteredStudents getter
+- [x] **Redirect back** — remember where the user was going before login, redirect there after
+- [ ] **404 page** — catch unmatched routes with { path: '/:pathMatch(._)_', component: NotFound }
+- [x] **Active link styling** — style the current nav link differently using .router-link-active
+- [x] **Search in store** — move searchTerm into studentsStore with a filteredStudents getter
 - [ ] **Courses store** — add a getCourseById getter and create a CourseDetail view with /courses/:id
 
 ---

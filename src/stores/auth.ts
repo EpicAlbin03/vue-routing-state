@@ -1,8 +1,18 @@
 import { API_URL, JWT_STORAGE_KEY, USER_STORAGE_KEY } from '@/lib/constants'
 import { computed, ref } from 'vue'
-import { defineStore } from 'pinia'
+import { acceptHMRUpdate, defineStore } from 'pinia'
 import { getStorageItem, setStorageItem } from '@/lib/utils'
 import type { LoginCredentials, User } from '@/lib/types'
+
+type AuthResponse = {
+  access: string
+  refresh: string
+}
+
+type JwtPayload = {
+  exp?: number
+  // userId?: number
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(getStorageItem(USER_STORAGE_KEY) || null)
@@ -26,7 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
       const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')
 
-      return JSON.parse(atob(paddedBase64)) as { exp?: number }
+      return JSON.parse(atob(paddedBase64)) as JwtPayload
     } catch {
       return null
     }
@@ -51,35 +61,45 @@ export const useAuthStore = defineStore('auth', () => {
     return false
   }
 
+  function setSession(data: AuthResponse, username: string) {
+    accessToken.value = data.access
+    user.value = {
+      username: username,
+    }
+    setStorageItem(JWT_STORAGE_KEY, accessToken.value)
+    setStorageItem(USER_STORAGE_KEY, user.value)
+  }
+
   async function login(credentials: LoginCredentials) {
     isLoading.value = true
     errorMessage.value = ''
 
-    const res = await fetch(`${API_URL}/token/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: credentials.username,
-        password: credentials.password,
-      }),
-    })
+    try {
+      const res = await fetch(`${API_URL}/token/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: credentials.username,
+          password: credentials.password,
+        }),
+      })
 
-    if (!res.ok) {
-      errorMessage.value = 'Invalid credentials'
+      if (!res.ok) {
+        errorMessage.value = 'Invalid credentials'
+        return false
+      }
+
+      const data = (await res.json()) as AuthResponse
+      setSession(data, credentials.username)
+      return true
+    } catch {
+      errorMessage.value = 'Unable to log in'
+      return false
+    } finally {
       isLoading.value = false
-      return
     }
-
-    const data = await res.json()
-    accessToken.value = data.access
-    user.value = {
-      username: data.username,
-    }
-    setStorageItem(JWT_STORAGE_KEY, accessToken.value)
-    setStorageItem(USER_STORAGE_KEY, user.value)
-    isLoading.value = false
   }
 
   function logout() {
@@ -102,3 +122,7 @@ export const useAuthStore = defineStore('auth', () => {
     validateAccessToken,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useAuthStore, import.meta.hot))
+}

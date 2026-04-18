@@ -28,23 +28,17 @@ function handleSubmit() {
 
 <template>
   <section class="login-form">
-    <div class="login-copy">
+    <div class="login-header">
       <h2>Login</h2>
       <p class="status-message">Use your student platform credentials to continue.</p>
     </div>
 
     <form class="surface-form" @submit.prevent="handleSubmit">
       <label for="username">Username</label>
-      <input id="username" v-model="username" type="text" name="username" autocomplete="username" />
+      <input id="username" v-model="username" type="text" name="username" />
 
       <label for="password">Password</label>
-      <input
-        id="password"
-        v-model="password"
-        type="password"
-        name="password"
-        autocomplete="current-password"
-      />
+      <input id="password" v-model="password" type="password" name="password" />
 
       <button type="submit" :disabled="props.isLoading">
         {{ props.isLoading ? 'Logging in...' : 'Login' }}
@@ -62,7 +56,7 @@ function handleSubmit() {
   gap: 16px;
 }
 
-.login-copy {
+.login-header {
   display: flex;
   flex-direction: column;
   gap: 6px;

@@ -1,26 +1,42 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { RouterLink } from 'vue-router'
 import { useCourseStore } from '@/stores/courses'
 import { useStudentStore } from '@/stores/students'
+import type { Course, Student } from '@/lib/types'
 
-const route = useRoute()
+const props = defineProps<{
+  id: number
+}>()
+
 const studentStore = useStudentStore()
 const courseStore = useCourseStore()
 
-const studentId = computed(() => Number(route.params.id))
-const student = computed(() => studentStore.getById(studentId.value))
-const course = computed(() => {
-  if (!student.value) {
-    return null
-  }
+const { isLoading: isLoadingStudents, errorMessage: studentErrorMessage } =
+  storeToRefs(studentStore)
 
-  return courseStore.getById(student.value.course)
-})
+const student = ref<Student | null>(null)
+const course = ref<Course | null>(null)
 
-onMounted(async () => {
-  await Promise.all([studentStore.load(), courseStore.load()])
-})
+// Fetch student and course to get newest data
+watch(
+  () => props.id,
+  async (id) => {
+    student.value = null
+    course.value = null
+
+    const fetchedStudent = await studentStore.loadStudent(id)
+
+    if (!fetchedStudent) {
+      return
+    }
+
+    student.value = fetchedStudent
+    course.value = await courseStore.loadCourse(fetchedStudent.course)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -34,11 +50,11 @@ onMounted(async () => {
       <RouterLink class="secondary-link" :to="{ name: 'students' }">Back to Students</RouterLink>
     </div>
 
-    <p v-if="studentStore.isLoading" class="status-message">Loading student...</p>
-    <p v-else-if="studentStore.errorMessage" class="error">{{ studentStore.errorMessage }}</p>
+    <p v-if="isLoadingStudents" class="status-message">Loading student...</p>
+    <p v-else-if="studentErrorMessage" class="error">{{ studentErrorMessage }}</p>
     <p v-else-if="!student" class="status-message">Student not found</p>
 
-    <article v-else class="card detail-card">
+    <div v-else class="card detail-card">
       <div class="detail-row">
         <span>Name</span>
         <strong>{{ student.name }}</strong>
@@ -63,6 +79,6 @@ onMounted(async () => {
         <span>Description</span>
         <p>{{ course.description }}</p>
       </div>
-    </article>
+    </div>
   </section>
 </template>

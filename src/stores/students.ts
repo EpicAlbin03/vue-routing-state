@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { defineStore } from 'pinia'
+import { acceptHMRUpdate, defineStore } from 'pinia'
 import { API_URL } from '@/lib/constants'
 import type { Student, StudentFormData, StudentSortOption } from '@/lib/types'
 import { useAuthStore } from './auth'
@@ -48,7 +48,9 @@ export const useStudentStore = defineStore('students', () => {
   const filteredStudents = computed(() => {
     const normalizedSearchTerm = searchTerm.value.trim().toLowerCase()
     const matchingStudents = normalizedSearchTerm
-      ? students.value.filter((student) => student.name.toLowerCase().includes(normalizedSearchTerm))
+      ? students.value.filter((student) =>
+        student.name.toLowerCase().includes(normalizedSearchTerm),
+      )
       : students.value
 
     const sortedStudents = [...matchingStudents]
@@ -69,68 +71,128 @@ export const useStudentStore = defineStore('students', () => {
   })
 
   async function load() {
+    if (isLoading.value) {
+      return true
+    }
+
     isLoading.value = true
     errorMessage.value = ''
 
-    const res = await fetch(`${API_URL}/students/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authStore.accessToken}`,
-      },
-    })
+    try {
+      const res = await fetch(`${API_URL}/students/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.accessToken}`,
+        },
+      })
 
-    if (!res.ok) {
-      errorMessage.value = 'Failed to load students'
+      if (!res.ok) {
+        errorMessage.value = 'Failed to load students'
+        return false
+      }
+
+      students.value = (await res.json()) as Student[]
+      return true
+    } catch {
+      errorMessage.value = 'Unable to load students'
+      return false
+    } finally {
       isLoading.value = false
-      return
+    }
+  }
+
+  async function loadStudent(id: number) {
+    if (isLoading.value) {
+      return null
     }
 
-    students.value = await res.json()
-    isLoading.value = false
+    isLoading.value = true
+    errorMessage.value = ''
+
+    try {
+      const res = await fetch(`${API_URL}/students/${id}/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.accessToken}`,
+        },
+      })
+
+      if (!res.ok) {
+        errorMessage.value = 'Failed to load student'
+        return null
+      }
+
+      return (await res.json()) as Student
+    } catch {
+      errorMessage.value = 'Unable to load student'
+      return null
+    } finally {
+      isLoading.value = false
+    }
   }
 
   async function create(formData: StudentFormData) {
-    errorMessage.value = ''
-
-    const res = await fetch(`${API_URL}/students/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authStore.accessToken}`,
-      },
-      body: JSON.stringify(formData),
-    })
-
-    if (!res.ok) {
-      errorMessage.value = 'Failed to create student'
-      return
+    if (isLoading.value) {
+      return false
     }
 
-    await load()
+    isLoading.value = true
+    errorMessage.value = ''
+
+    try {
+      const res = await fetch(`${API_URL}/students/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.accessToken}`,
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!res.ok) {
+        errorMessage.value = 'Failed to create student'
+        return false
+      }
+
+      const createdStudent = (await res.json()) as Student
+      students.value = [...students.value, createdStudent]
+      return true
+    } catch {
+      errorMessage.value = 'Unable to create student'
+      return false
+    } finally {
+      isLoading.value = false
+    }
   }
 
   // 'delete' is reserved
   async function remove(id: number) {
     errorMessage.value = ''
 
-    const res = await fetch(`${API_URL}/students/${id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authStore.accessToken}`,
-      },
-    })
+    try {
+      const res = await fetch(`${API_URL}/students/${id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.accessToken}`,
+        },
+      })
 
-    if (!res.ok) {
-      errorMessage.value = 'Failed to delete student'
-      return
+      if (!res.ok) {
+        errorMessage.value = 'Failed to delete student'
+        return false
+      }
+
+      students.value = students.value.filter((student) => student.id !== id)
+      return true
+    } catch {
+      errorMessage.value = 'Unable to delete student'
+      return false
     }
-
-    students.value = students.value.filter((s) => s.id !== id)
   }
 
-  function getStudentsInCourse(courseId: number) {
-    return students.value.filter((student) => student.course === courseId)
+  function getStudentsInCourse(course: number) {
+    return students.value.filter((student) => student.course === course)
   }
 
   function getById(id: number) {
@@ -165,6 +227,7 @@ export const useStudentStore = defineStore('students', () => {
     sortOption,
     filteredStudents,
     load,
+    loadStudent,
     create,
     remove,
     getStudentsInCourse,
@@ -175,3 +238,7 @@ export const useStudentStore = defineStore('students', () => {
     clear,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useStudentStore, import.meta.hot))
+}

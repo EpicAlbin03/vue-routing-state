@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import LoginForm from '@/components/LoginForm.vue'
 import type { LoginCredentials } from '@/lib/types'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const { errorMessage, isLoading } = storeToRefs(authStore)
 const route = useRoute()
 const router = useRouter()
 
@@ -15,21 +17,17 @@ const redirectPath = computed(() => {
 })
 
 async function handleLogin(credentials: LoginCredentials) {
-  await authStore.login(credentials)
+  const isAuthenticated = await authStore.login(credentials)
 
-  if (authStore.hasValidAccessToken) {
-    router.push(redirectPath.value)
+  if (isAuthenticated) {
+    await router.replace(redirectPath.value)
   }
 }
 </script>
 
 <template>
   <section class="login-page">
-    <LoginForm
-      :error-message="authStore.errorMessage"
-      :is-loading="authStore.isLoading"
-      @submit="handleLogin"
-    />
+    <LoginForm :error-message="errorMessage" :is-loading="isLoading" @submit="handleLogin" />
   </section>
 </template>
 

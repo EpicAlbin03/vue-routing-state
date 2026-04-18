@@ -1,39 +1,40 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCourseStore } from '@/stores/courses'
 import { useStudentStore } from '@/stores/students'
 
+const router = useRouter()
+
 const authStore = useAuthStore()
 const studentStore = useStudentStore()
 const courseStore = useCourseStore()
-const router = useRouter()
 
-const isLoggedIn = computed(() => authStore.hasValidAccessToken)
+const { hasValidAccessToken, user } = storeToRefs(authStore)
 
-function handleLogout() {
+async function handleLogout() {
   studentStore.clear()
   courseStore.clear()
   authStore.logout()
-  router.push({ name: 'login' })
+  await router.replace({ name: 'login' })
 }
 </script>
 
 <template>
   <header>
     <nav>
-      <RouterLink class="brand" :to="{ name: isLoggedIn ? 'students' : 'login' }">
+      <RouterLink class="brand" :to="{ name: hasValidAccessToken ? 'students' : 'login' }">
         Student Dashboard
       </RouterLink>
 
-      <div v-if="isLoggedIn" class="nav-user">
+      <div v-if="hasValidAccessToken" class="nav-user">
         <div class="nav-links">
           <RouterLink :to="{ name: 'students' }">Students</RouterLink>
           <RouterLink :to="{ name: 'courses' }">Courses</RouterLink>
         </div>
 
-        <p><b>Logged in as:</b> {{ authStore.user?.username }}</p>
+        <p><b>Logged in as:</b> {{ user?.username }}</p>
         <button type="button" @click="handleLogout">Logout</button>
       </div>
     </nav>
@@ -84,6 +85,7 @@ nav {
 
 .nav-links a.router-link-active {
   color: #0f172a;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
