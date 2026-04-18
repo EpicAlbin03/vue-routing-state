@@ -16,6 +16,7 @@ export type Student = {
 }
 
 export type StudentFormData = Omit<Student, 'id'>
+export type StudentSortOption = 'name' | 'grade'
 
 export type Course = {
   id: number

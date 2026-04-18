@@ -27,7 +27,7 @@ onMounted(async () => {
     </div>
 
     <p v-if="courseStore.isLoading" class="status-message">Loading courses...</p>
-    <p v-else-if="courseStore.errorMessage" class="errorMessage">{{ courseStore.errorMessage }}</p>
+    <p v-else-if="courseStore.errorMessage" class="error">{{ courseStore.errorMessage }}</p>
     <p v-else-if="courseStore.courses.length < 1" class="status-message">No courses yet</p>
     <div v-else class="card-grid">
       <CourseCard

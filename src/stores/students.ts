@@ -1,7 +1,7 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { API_URL } from '@/lib/constants'
-import type { Student, StudentFormData } from '@/lib/types'
+import type { Student, StudentFormData, StudentSortOption } from '@/lib/types'
 import { useAuthStore } from './auth'
 
 export const useStudentStore = defineStore('students', () => {
@@ -9,6 +9,64 @@ export const useStudentStore = defineStore('students', () => {
   const isLoading = ref(false)
   const authStore = useAuthStore()
   const errorMessage = ref('')
+  const searchTerm = ref('')
+  const sortOption = ref<StudentSortOption>('name')
+
+  function getGradeSortValue(grade: string) {
+    const normalizedGrade = grade.trim().toUpperCase()
+    const baseGradeValues: Record<string, number> = {
+      A: 0,
+      B: 3,
+      C: 6,
+      D: 9,
+      F: 12,
+    }
+
+    const baseGrade = normalizedGrade[0]
+    const modifier = normalizedGrade[1] ?? ''
+    const baseValue = baseGradeValues[baseGrade as keyof typeof baseGradeValues]
+
+    if (baseValue === undefined) {
+      return Number.MAX_SAFE_INTEGER
+    }
+
+    if (baseGrade === 'F') {
+      return baseValue
+    }
+
+    if (modifier === '+') {
+      return baseValue
+    }
+
+    if (modifier === '-') {
+      return baseValue + 2
+    }
+
+    return baseValue + 1
+  }
+
+  const filteredStudents = computed(() => {
+    const normalizedSearchTerm = searchTerm.value.trim().toLowerCase()
+    const matchingStudents = normalizedSearchTerm
+      ? students.value.filter((student) => student.name.toLowerCase().includes(normalizedSearchTerm))
+      : students.value
+
+    const sortedStudents = [...matchingStudents]
+
+    if (sortOption.value === 'name') {
+      return sortedStudents.sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    return sortedStudents.sort((a, b) => {
+      const gradeDifference = getGradeSortValue(a.grade) - getGradeSortValue(b.grade)
+
+      if (gradeDifference === 0) {
+        return a.name.localeCompare(b.name)
+      }
+
+      return gradeDifference
+    })
+  })
 
   async function load() {
     isLoading.value = true
@@ -75,13 +133,45 @@ export const useStudentStore = defineStore('students', () => {
     return students.value.filter((student) => student.course === courseId)
   }
 
+  function getById(id: number) {
+    return students.value.find((student) => student.id === id) || null
+  }
+
+  function setSearchTerm(value: string) {
+    searchTerm.value = value
+  }
+
+  function setSortOption(value: StudentSortOption) {
+    sortOption.value = value
+  }
+
+  function resetFilters() {
+    searchTerm.value = ''
+    sortOption.value = 'name'
+  }
+
+  function clear() {
+    students.value = []
+    errorMessage.value = ''
+    isLoading.value = false
+    resetFilters()
+  }
+
   return {
     students,
     isLoading,
     errorMessage,
+    searchTerm,
+    sortOption,
+    filteredStudents,
     load,
     create,
     remove,
     getStudentsInCourse,
+    getById,
+    setSearchTerm,
+    setSortOption,
+    resetFilters,
+    clear,
   }
 })
