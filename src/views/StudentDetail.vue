@@ -24,7 +24,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="student-detail-page">
+  <section class="student-detail-page page-section">
     <div class="page-header">
       <div>
         <h2>Student Detail</h2>
@@ -38,7 +38,7 @@ onMounted(async () => {
     <p v-else-if="studentStore.errorMessage" class="error">{{ studentStore.errorMessage }}</p>
     <p v-else-if="!student" class="status-message">Student not found</p>
 
-    <article v-else class="detail-card">
+    <article v-else class="card detail-card">
       <div class="detail-row">
         <span>Name</span>
         <strong>{{ student.name }}</strong>
@@ -66,69 +66,3 @@ onMounted(async () => {
     </article>
   </section>
 </template>
-
-<style scoped>
-.student-detail-page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.secondary-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 16px;
-  font-weight: 600;
-  color: #0f172a;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  text-decoration: none;
-}
-
-.secondary-link:hover {
-  background: #f8fafc;
-}
-
-.detail-card {
-  padding: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.detail-row,
-.detail-description {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.detail-row span,
-.detail-description span {
-  color: #64748b;
-  font-size: 0.95rem;
-}
-
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-  }
-
-  .secondary-link {
-    width: 100%;
-  }
-}
-</style>

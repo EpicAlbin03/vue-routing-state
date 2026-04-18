@@ -14,7 +14,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="courses-page">
+  <section class="courses-page page-section">
     <div class="page-header">
       <div>
         <h2>Courses ({{ courseStore.courses.length }})</h2>
@@ -39,69 +39,3 @@ onMounted(async () => {
     </div>
   </section>
 </template>
-
-<style scoped>
-.courses-page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.page-header > div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.secondary-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 16px;
-  font-weight: 600;
-  color: #0f172a;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  text-decoration: none;
-}
-
-.secondary-link:hover {
-  background: #f8fafc;
-}
-
-.card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-}
-
-.card-grid > * {
-  flex: 1 1 260px;
-}
-
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-  }
-
-  .secondary-link {
-    width: 100%;
-  }
-
-  .card-grid {
-    flex-direction: column;
-  }
-
-  .card-grid > * {
-    flex-basis: auto;
-  }
-}
-</style>

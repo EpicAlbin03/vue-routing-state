@@ -15,7 +15,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="students-page">
+  <section class="students-page page-section">
     <div class="page-header">
       <div>
         <h2>Students ({{ studentStore.students.length }})</h2>
@@ -51,44 +51,3 @@ onMounted(async () => {
     </div>
   </section>
 </template>
-
-<style scoped>
-.students-page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.page-header > div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-}
-
-.card-grid > * {
-  flex: 1 1 260px;
-}
-
-@media (max-width: 768px) {
-  .card-grid {
-    flex-direction: column;
-  }
-
-  .card-grid > * {
-    flex-basis: auto;
-  }
-}
-</style>

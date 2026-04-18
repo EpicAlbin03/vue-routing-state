@@ -92,33 +92,3 @@ watch(courses, syncCourseSelection, { immediate: true })
     </form>
   </section>
 </template>
-
-<style scoped>
-.card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-h3 {
-  margin-bottom: 12px;
-  color: #0f172a;
-}
-
-button {
-  align-self: flex-start;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-@media (max-width: 768px) {
-  button {
-    width: 100%;
-  }
-}
-</style>

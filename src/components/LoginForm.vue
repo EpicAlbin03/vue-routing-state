@@ -33,7 +33,7 @@ function handleSubmit() {
       <p class="status-message">Use your student platform credentials to continue.</p>
     </div>
 
-    <form @submit.prevent="handleSubmit">
+    <form class="surface-form" @submit.prevent="handleSubmit">
       <label for="username">Username</label>
       <input id="username" v-model="username" type="text" name="username" autocomplete="username" />
 
@@ -66,28 +66,5 @@ function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-form {
-  padding: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-}
-
-button {
-  align-self: flex-start;
-}
-
-button:disabled {
-  cursor: wait;
-  opacity: 0.75;
-}
-
-@media (max-width: 768px) {
-  button {
-    width: 100%;
-  }
 }
 </style>
